@@ -6,18 +6,11 @@
 #include <memory>
 #include <vector>
 #include "Logger.hpp"
+#include "Protocol.hpp"
 
 using asio::ip::tcp;
 
 class SecurityLogger;
-
-#pragma pack(push, 1)
-struct PacketHeader {
-    uint32_t magic_number; 
-    uint32_t payload_len;   
-    char device_name[32];  
-};
-#pragma pack(pop)
 
 class Session : public std::enable_shared_from_this<Session> {
 public:
