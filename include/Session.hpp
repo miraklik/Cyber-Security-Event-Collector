@@ -2,11 +2,14 @@
 #define SESSION_HPP
 
 #include <asio.hpp>
+#include <asio/ssl.hpp>
 #include <memory>
 #include <vector>
 #include "Logger.hpp"
 
 using asio::ip::tcp;
+
+class SecurityLogger;
 
 #pragma pack(push, 1)
 struct PacketHeader {
@@ -18,7 +21,7 @@ struct PacketHeader {
 
 class Session : public std::enable_shared_from_this<Session> {
 public:
-    Session(tcp::socket socket, SecurityLogger& logger);
+    Session(asio::ssl::stream<tcp::socket> socket, SecurityLogger& logger);
     void start();
 
 private:
@@ -26,10 +29,10 @@ private:
     void read_header();
     void read_payload();
 
-    tcp::socket socket_;
     SecurityLogger& logger_;
     asio::steady_timer timer_;
     PacketHeader header_;
+    asio::ssl::stream<tcp::socket> socket_; 
     std::vector<uint8_t> payload_data_;
 };
 

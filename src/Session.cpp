@@ -1,8 +1,14 @@
 #include "Session.hpp"
+#include "Logger.hpp"
+#include <asio.hpp>
 #include <iostream>
 
-Session::Session(tcp::socket socket, SecurityLogger& logger)
-    : socket_(std::move(socket)), logger_(logger), timer_(socket_.get_executor()) {}
+Session::Session(asio::ssl::stream<tcp::socket> socket, SecurityLogger& logger)
+    : socket_(std::move(socket)), 
+      logger_(logger), 
+      timer_(socket_.get_executor()),
+      header_{}
+{}
 
 void Session::start() {
     read_header();
@@ -12,7 +18,11 @@ void Session::reset_timeout() {
     auto self(shared_from_this());
     timer_.expires_after(std::chrono::seconds(30));
     timer_.async_wait([this, self](const asio::error_code& ec) {
-        if (!ec) { socket_.close(); }
+        if (!ec) { 
+            asio::error_code ignored_ec;
+            socket_.lowest_layer().shutdown(tcp::socket::shutdown_both, ignored_ec);
+            socket_.lowest_layer().close(ignored_ec);
+        }
     });
 }
 
