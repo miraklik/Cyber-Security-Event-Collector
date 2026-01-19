@@ -17,3 +17,8 @@ target_link_libraries(security_server PRIVATE
     OpenSSL::SSL 
     OpenSSL::Crypto
 )
+
+add_executable(security_agent 
+    src/agent_main.cpp
+)
+target_link_libraries(security_agent PRIVATE OpenSSL::SSL Threads::Threads)
