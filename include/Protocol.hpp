@@ -6,11 +6,13 @@
 
 inline constexpr uint32_t SECURITY_MAGIC = 0xABCD1234;
 inline constexpr size_t DEVICE_NAME_MAX = 32;
+inline constexpr size_t HASH_SIZE= 65;
 
 #pragma pack(push, 1)
 struct PacketHeader {
     uint32_t magic_number;  
     uint32_t payload_len;   
+    char file_hash[65];
     char device_name[DEVICE_NAME_MAX]; 
 };
 #pragma pack(pop)
