@@ -10,6 +10,7 @@ int main() {
         SecurityLogger logger;
 
         asio::ssl::context ssl_ctx(asio::ssl::context::sslv23);
+        ssl_ctx.set_verify_mode(asio::ssl::verify_peer | asio::ssl::verify_fail_if_no_peer_cert);
         ssl_ctx.use_certificate_chain_file("cert.pem");
         ssl_ctx.use_private_key_file("key.pem", asio::ssl::context::pem);
         
