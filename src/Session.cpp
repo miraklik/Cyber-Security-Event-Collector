@@ -56,7 +56,6 @@ void Session::read_header() {
                     socket_.lowest_layer().cancel(ignored_ec);
                     return;
             }
-
                 read_payload();
             }
         });
