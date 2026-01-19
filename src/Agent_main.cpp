@@ -3,8 +3,10 @@
 #include <iostream>
 #include <string>
 #include <filesystem>
+#include <format>
 #include <thread>
 #include "Protocol.hpp"
+#include "Utils.hpp"
 
 using asio::ip::tcp;
 namespace fs = std::filesystem;
@@ -20,7 +22,7 @@ void send_alert(asio::ssl::stream<tcp::socket>& ssl_socket, const std::string& f
     asio::write(ssl_socket, asio::buffer(&header, sizeof(header)));
     asio::write(ssl_socket, asio::buffer(msg));
 
-    std::cout << "[SENT] Alert for file: " << filename << std::endl;
+    std::cout << std::format("{} Alert for file: {}", SENT, filename) << std::endl;
 }
 
 int main() {
@@ -35,12 +37,12 @@ int main() {
         asio::connect(ssl_stream.lowest_layer(), resolver.resolve("127.0.0.1", "12345"));
         ssl_stream.handshake(asio::ssl::stream_base::client);
         
-        std::cout << "[+] Connected to Security Server over TLS!" << std::endl;
+        std::cout << std::format("{} Connected to Security Server over TLS!", PLUS) << std::endl;
 
         fs::path path_to_watch = "./watch_folder"; 
         if (!fs::exists(path_to_watch)) fs::create_directory(path_to_watch);
 
-        std::cout << "[*] Monitoring folder: " << path_to_watch << std::endl;
+        std::cout << std::format("{} Monitoring folder: {}", STAR, path_to_watch) << std::endl;
 
         while (true) {
             for (const auto& entry : fs::directory_iterator(path_to_watch)) {
@@ -50,7 +52,7 @@ int main() {
         }
 
     } catch (std::exception& e) {
-        std::cerr << "Agent Error: " << e.what() << std::endl;
+        std::cerr << std::format("{} Agent Error: {}", ERROR, e.what()) << std::endl;
     }
     return 0;
 }
