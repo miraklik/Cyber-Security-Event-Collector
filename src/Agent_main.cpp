@@ -6,10 +6,10 @@
 #include <filesystem>
 #include <fstream>
 #include <format>
-#include <set>
 #include <thread>
 #include "Protocol.hpp"
 #include "Utils.hpp"
+#include "Database.hpp"
 
 using asio::ip::tcp;
 namespace fs = std::filesystem;
@@ -82,15 +82,15 @@ int main() {
 
         std::cout << std::format("{} Monitoring folder: {}", STAR, path_to_watch) << std::endl;
 
-        std::set<std::string> processed_files;
+        DatabaseManager db_manager("./malware.db");
 
         while (true) {
             for (const auto& entry : fs::directory_iterator(path_to_watch)) {
                 std::string fname = entry.path().filename().string();
-                
-                if (processed_files.find(fname) == processed_files.end()) {
+                if (db_manager.is_malware(calculate_sha256(entry.path().string()))) {
+                    std::cout << std::format("{} Malware detected: {}", ERROR, fname) << std::endl;
                     send_alert(ssl_stream, entry.path());
-                    processed_files.insert(fname); 
+                    db_manager.add_malware(calculate_sha256(entry.path().string()), "Detected by Agent");
                 }
             }
             std::this_thread::sleep_for(std::chrono::seconds(5));

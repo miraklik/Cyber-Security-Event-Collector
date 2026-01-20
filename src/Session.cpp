@@ -2,9 +2,9 @@
 #include "Logger.hpp"
 #include "Protocol.hpp"
 #include "Utils.hpp"
+#include "Database.hpp"
 #include <asio.hpp>
 #include <format>
-#include <set>
 #include <iostream>
 
 Session::Session(asio::ssl::stream<tcp::socket> socket, SecurityLogger& logger)
@@ -41,21 +41,18 @@ void Session::read_header() {
                     return;
                 }
 
-                static const std::set<std::string> blacklist = {
-                    "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
-                    "5d41402abc4b2a76b9719d911017c592",
-                    "d41d8cd98f00b204e9800998ecf8427e"
-                };
+                DatabaseManager db_manager("./malware.db");
+
+                if(db_manager.is_malware(std::string(header_.file_hash))) {
+                    std::cout << std::format("{} Malware packet received from device: {}", PLUS, header_.device_name) << std::endl;
+                } else {
+                    std::cout << std::format("{} Packet received from device: {}", PLUS, header_.device_name) << std::endl;
+                }
 
                 std::string received_hash(header_.file_hash);
-                if (blacklist.find(received_hash) != blacklist.end()) {
-                    std::cout << std::format("{} Blacklisted file hash detected: {}", WARNING, received_hash) << std::endl;
-                    std::cout << std::format("{} MALWARE DETECTED from device: {}", WARNING, header_.device_name) << std::endl;
-
-                    asio::error_code ignored_ec;
-                    socket_.lowest_layer().cancel(ignored_ec);
-                    return;
-            }
+                if (db_manager.is_malware(received_hash)) {
+                    std::cout << std::format("{} Malware packet received from device: {}", PLUS, header_.device_name) << std::endl;
+                }
                 read_payload();
             }
         });

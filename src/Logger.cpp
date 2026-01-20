@@ -1,6 +1,6 @@
 #include<iostream>
 #include<vector>
-#include "Logger.hpp"
+#include"Logger.hpp"
 
 void SecurityLogger::logEvent(std::unique_ptr<Event> event) {
     std::lock_guard<std::mutex> lock(mtx_);
