@@ -10,6 +10,8 @@ public:
 
     bool is_malware(const std::string& file_hash);
     void add_malware(const std::string& file_hash, const std::string& description);
+    void get_malware_list();
+    void remove_malware(const std::string& file_hash);
 
 private:
     SQLite::Database db;
